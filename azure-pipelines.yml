@@ -1,0 +1,44 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+  - job: Build
+    displayName: "Build and test"
+    steps:
+      - task: Maven@3
+        displayName: Build and Test
+        inputs:
+          publishJUnitResults: true
+          javaHomeOption: JDKVersion
+          jdkVersionOption: 11
+          jdkArchitectureOption: x64
+          publishJunitResults: true
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          testRunTitle: 'Karate Integration Tests'
+          mavenPomFile: pom.xml
+          goals: "clean test -DskipTests=true"
+          mavenOptions: '-Xmx3072m'
+
+      - task: PublishTestResults@2
+        displayName: Publish KarateTest Results
+        inputs:
+          targetPath: 'target/cucumber-html-reports'
+          artifact: 'Summary-Report'
+
+#      - script: |
+#          mvn clean test
+#        displayName: Test
+
+#      - task: PublishTestResults@2
+#        displayName: Publish KarateTest Results
+#        inputs:
+#          testRunTitle: "Karate Integration Tests"
+#          testResultsFormat: "html"
+#          testResultsFiles: "**/karate-reports/xml/*.xml"
+#          failTaskOnFailedTests: true
+#          mergeTestResults: true
+
+
