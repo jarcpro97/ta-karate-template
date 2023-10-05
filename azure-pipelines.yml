@@ -7,6 +7,7 @@ pool:
 jobs:
   - job: Build
     displayName: "Build and test"
+  type nul > filename.txt
     steps:
       - task: Maven@3
         displayName: Build Test Project

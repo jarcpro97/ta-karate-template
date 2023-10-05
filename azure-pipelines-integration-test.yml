@@ -1,0 +1,36 @@
+trigger:
+  branches:
+    include:
+      - qa/*
+      - integration-tests
+
+schedules:
+  - cron: '15 18 * * 1-5'
+    displayName: Smoke build
+    branches:
+      include:
+        - integration-tests
+    always: true
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+  - job: BuildAndTest
+    displayName: "Build and test"
+    condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI','Manual'))
+    steps:      
+    - template: templates/run-tests-steps.yml
+      parameters:
+        testToRun: 
+
+  - job: BuildAndTestSmoke
+    displayName: "Build and test Smoke Schedule"
+    condition: eq(variables['Build.CronSchedule.DisplayName'], 'Smoke build')
+    steps: 
+    - template: templates/run-tests-steps.yml
+      parameters:
+        testToRun: "-D'karate.options=-t=@Smoke'"     
+      
+
+

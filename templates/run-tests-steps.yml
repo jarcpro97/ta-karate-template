@@ -1,0 +1,39 @@
+parameters:
+- name: testToRun
+  default: ''
+  type: string
+
+steps:      
+  - task: Maven@3
+    displayName: Build Test Project
+    inputs:
+      javaHomeOption: JDKVersion
+      jdkVersionOption: 11
+      jdkArchitectureOption: x64
+      goals: 'clean install -DskipTests=true'
+      mavenOptions: '-Xmx3072m'
+
+  - script: |
+      mvn clean test ${{ parameters.testToRun }}
+    displayName: Run Tests
+
+  - task: PublishTestResults@2
+    displayName: Publish KarateTest Results
+    inputs:
+      testRunTitle: 'Karate Integration Tests'
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Artifacts
+    inputs:
+      targetPath: 'target/cucumber-html-reports'
+      artifact: 'Summary-Report'
+
+  - task: PublishCucumberReport@1
+    displayName: 'Publish Cucumber Report'
+    inputs:
+      jsonDir: target/karate-reports
+      outputPath: target/cucumber-html-reports 
+      name: 'Integration Tests'
+      title: API
